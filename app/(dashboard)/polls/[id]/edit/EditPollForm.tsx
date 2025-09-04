@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function EditPollForm({ poll }: { poll: any }) {
-  const [question, setQuestion] = useState(poll.question);
-  const [options, setOptions] = useState<string[]>(poll.options || []);
+  const [question, setQuestion] = useState(poll.question || '');
+  const [options, setOptions] = useState<string[]>(poll.options || ['']);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 

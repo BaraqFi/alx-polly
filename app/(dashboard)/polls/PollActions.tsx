@@ -8,8 +8,8 @@ import { deletePoll } from "@/app/lib/actions/poll-actions";
 interface Poll {
   id: string;
   question: string;
-  options: any[];
-  user_id: string;
+  options?: any[]; // Made optional since it might not exist in database
+  created_by: string;
 }
 
 interface PollActionsProps {
@@ -18,6 +18,10 @@ interface PollActionsProps {
 
 export default function PollActions({ poll }: PollActionsProps) {
   const { user } = useAuth();
+  
+  // Debug logging to see what data we're getting
+  console.log('Poll data:', poll);
+  
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this poll?")) {
       await deletePoll(poll.id);
@@ -34,12 +38,14 @@ export default function PollActions({ poll }: PollActionsProps) {
               <h2 className="group-hover:text-blue-600 transition-colors font-bold text-lg">
                 {poll.question}
               </h2>
-              <p className="text-slate-500">{poll.options.length} options</p>
+              <p className="text-slate-500">
+                {poll.options ? poll.options.length : 0} options
+              </p>
             </div>
           </div>
         </div>
       </Link>
-      {user && user.id === poll.user_id && (
+      {user && user.id === poll.created_by && ( // Changed from user_id to created_by
         <div className="flex gap-2 p-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/polls/${poll.id}/edit`}>Edit</Link>
