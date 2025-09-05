@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { submitVote } from '@/app/lib/actions/poll-actions';
+import { submitVote, getVoteCounts } from '@/app/lib/actions/poll-actions';
 import { useAuth } from '@/app/lib/context/auth-context';
 
 interface PollVoteComponentProps {
@@ -16,9 +16,24 @@ export default function PollVoteComponent({ poll }: PollVoteComponentProps) {
   const [hasVoted, setHasVoted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [voteCounts, setVoteCounts] = useState<number[]>([]);
+  const [totalVotes, setTotalVotes] = useState(0);
+  const [loadingVotes, setLoadingVotes] = useState(true);
   const { user } = useAuth();
 
-  const totalVotes = poll.options.reduce((sum: number, option: any) => sum + (option.votes || 0), 0);
+  // Fetch vote counts when component mounts
+  useEffect(() => {
+    const fetchVoteCounts = async () => {
+      const { voteCounts: counts, totalVotes: total, error } = await getVoteCounts(poll.id);
+      if (!error) {
+        setVoteCounts(counts);
+        setTotalVotes(total);
+      }
+      setLoadingVotes(false);
+    };
+    
+    fetchVoteCounts();
+  }, [poll.id]);
 
   const handleVote = async () => {
     if (selectedOption === null) return;
@@ -32,6 +47,10 @@ export default function PollVoteComponent({ poll }: PollVoteComponentProps) {
       setError(result.error);
     } else {
       setHasVoted(true);
+      // Refresh vote counts after voting
+      const { voteCounts: counts, totalVotes: total } = await getVoteCounts(poll.id);
+      setVoteCounts(counts);
+      setTotalVotes(total);
     }
     
     setIsSubmitting(false);
@@ -92,26 +111,32 @@ export default function PollVoteComponent({ poll }: PollVoteComponentProps) {
           ) : (
             <div className="space-y-4">
               <h3 className="font-medium">Results:</h3>
-              {poll.options.map((option: string, index: number) => {
-                const votes = 0; // You'll need to fetch actual vote counts
-                return (
-                  <div key={index} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{option}</span>
-                      <span>{getPercentage(votes)}% ({votes} votes)</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5">
-                      <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
-                        style={{ width: `${getPercentage(votes)}%` }}
-                      ></div>
-                    </div>
+              {loadingVotes ? (
+                <div className="text-center py-4">Loading vote counts...</div>
+              ) : (
+                <>
+                  {poll.options.map((option: string, index: number) => {
+                    const votes = voteCounts[index] || 0;
+                    return (
+                      <div key={index} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>{option}</span>
+                          <span>{getPercentage(votes)}% ({votes} votes)</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2.5">
+                          <div 
+                            className="bg-blue-600 h-2.5 rounded-full" 
+                            style={{ width: `${getPercentage(votes)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="text-sm text-slate-500 pt-2">
+                    Total votes: {totalVotes}
                   </div>
-                );
-              })}
-              <div className="text-sm text-slate-500 pt-2">
-                Total votes: {totalVotes}
-              </div>
+                </>
+              )}
             </div>
           )}
         </CardContent>

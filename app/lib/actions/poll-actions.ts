@@ -272,9 +272,30 @@ export async function updatePoll(pollId: string, formData: FormData) {
     .eq("id", pollId)
     .eq("created_by", user.id); // Changed from user_id to created_by
 
-  if (error) {
-    return { error: error.message };
-  }
-
   return { error: null };
+}
+
+// GET VOTE COUNTS FOR A POLL
+export async function getVoteCounts(pollId: string) {
+  const supabase = await createClient();
+  
+  const { data: votes, error } = await supabase
+    .from("votes")
+    .select("option_index")
+    .eq("poll_id", pollId);
+
+  if (error) return { voteCounts: [], totalVotes: 0, error: error.message };
+
+  // Count votes for each option
+  const voteCounts = votes.reduce((counts: number[], vote) => {
+    const index = vote.option_index;
+    if (index >= 0 && index < counts.length) {
+      counts[index] = (counts[index] || 0) + 1;
+    }
+    return counts;
+  }, []);
+
+  const totalVotes = votes.length;
+  
+  return { voteCounts, totalVotes, error: null };
 }
