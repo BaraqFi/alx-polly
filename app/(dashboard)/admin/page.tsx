@@ -49,16 +49,16 @@ export default async function AdminPage() {
           <div key={poll.id} className="border rounded-lg p-4 bg-white shadow-sm">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">{poll.question}</h3>
+                <h3 className="text-lg font-semibold">{poll.title}</h3> {/* Changed from question to title */}
                 <div className="text-sm text-gray-600 mt-2 space-y-1">
                   <div>
-                    <strong>Owner:</strong> {poll.profiles?.email || 'Unknown'}
+                    <strong>Owner:</strong> {poll.profiles?.email || poll.created_by || 'Unknown'}
                   </div>
                   <div>
                     <strong>Created:</strong> {new Date(poll.created_at).toLocaleDateString()}
                   </div>
                   <div>
-                    <strong>Options:</strong> {poll.options.length}
+                    <strong>Options:</strong> {poll.options?.length || 0}
                   </div>
                 </div>
               </div>

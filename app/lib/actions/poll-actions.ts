@@ -59,7 +59,7 @@ export async function createPoll(formData: FormData) {
   const { error } = await supabase.from("polls").insert([
     {
       created_by: user.id, // Changed from user_id to created_by
-      question: question.trim(),
+      title: question.trim(), // Changed from question to title
       options: uniqueOptions,
       is_active: true, // Add the is_active field
     },
@@ -268,7 +268,7 @@ export async function updatePoll(pollId: string, formData: FormData) {
   // Only allow updating polls owned by the user
   const { error } = await supabase
     .from("polls")
-    .update({ question: question.trim(), options: uniqueOptions })
+    .update({ title: question.trim(), options: uniqueOptions }) // Changed from question to title
     .eq("id", pollId)
     .eq("created_by", user.id); // Changed from user_id to created_by
 

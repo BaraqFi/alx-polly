@@ -59,7 +59,7 @@ export default function PollVoteComponent({ poll }: PollVoteComponentProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{poll.question}</CardTitle>
+          <CardTitle className="text-2xl">{poll.title}</CardTitle> {/* Changed from question to title */}
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (

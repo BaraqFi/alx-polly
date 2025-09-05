@@ -7,7 +7,7 @@ import { deletePoll } from "@/app/lib/actions/poll-actions";
 
 interface Poll {
   id: string;
-  question: string;
+  title: string; // Changed from question to title
   options?: any[]; // Made optional since it might not exist in database
   created_by: string;
 }
@@ -36,7 +36,7 @@ export default function PollActions({ poll }: PollActionsProps) {
           <div className="h-full">
             <div>
               <h2 className="group-hover:text-blue-600 transition-colors font-bold text-lg">
-                {poll.question}
+                {poll.title} {/* Changed from question to title */}
               </h2>
               <p className="text-slate-500">
                 {poll.options ? poll.options.length : 0} options
